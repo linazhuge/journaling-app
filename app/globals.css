@@ -133,8 +133,23 @@
 .ProseMirror {
   background: transparent !important;
   outline: none;
+  user-select: text !important;
+  -webkit-user-select: text !important;
+  cursor: text;
+  padding: 0 !important;
+  margin: 0 !important;
 }
 
 .ProseMirror p {
   margin: 0;
+  padding: 0;
+}
+
+/* Placeholder text — shows on the first empty line */
+.ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: #c8bdb0;
+  pointer-events: none;
+  height: 0;
 }

@@ -63,6 +63,7 @@ export function BookSpread({
               onChange={onPageChange}
               pageCount={pageCount}
               editorStyle={editorStyle}
+              autoFocus
             />
           </JournalPage>
         </div>

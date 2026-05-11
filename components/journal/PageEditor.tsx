@@ -7,6 +7,7 @@ import { TextStyle } from '@tiptap/extension-text-style';
 import { Color } from '@tiptap/extension-color';
 import { FontFamily } from '@tiptap/extension-font-family';
 import { FontSize } from '@tiptap/extension-text-style/font-size';
+import Placeholder from '@tiptap/extension-placeholder';
 import type { EditorStyle } from './EditorToolbar';
 import { LINE_HEIGHT_PX } from '@/lib/editor-config';
 import { useActiveEditor } from '@/lib/active-editor-context';
@@ -17,6 +18,7 @@ interface PageEditorProps {
   onChange: (pageNumber: number, content: string) => void;
   pageCount: number;
   editorStyle: EditorStyle;
+  autoFocus?: boolean;
 }
 
 export function PageEditor({
@@ -25,6 +27,7 @@ export function PageEditor({
   onChange,
   pageCount,
   editorStyle,
+  autoFocus = false,
 }: PageEditorProps) {
   const isValid = pageNumber >= 1 && pageNumber <= pageCount;
   const lastContent = useRef(content);
@@ -39,10 +42,11 @@ export function PageEditor({
       FontSize,
     ],
     content: content ? JSON.parse(content) : '',
+    autofocus: autoFocus ? 'start' : false,
     editorProps: {
       attributes: {
         class: 'outline-none w-full h-full',
-        style: `font-family: ${editorStyle.fontCss}; color: ${editorStyle.color}; font-size: ${editorStyle.sizePx}px; line-height: ${LINE_HEIGHT_PX}px; background: transparent;`,
+        style: `font-family: ${editorStyle.fontCss}; color: ${editorStyle.color}; font-size: ${editorStyle.sizePx}px; line-height: ${LINE_HEIGHT_PX}px; background: transparent; user-select: text; -webkit-user-select: text;`,
         'data-page': String(pageNumber),
       },
     },
@@ -62,13 +66,15 @@ export function PageEditor({
     immediatelyRender: false,
   });
 
-  // Sync style changes to editor attributes
+  // Sync style changes to editor attributes; also store editor ref on DOM
+  // so JournalPage's padding-click handler can call focus('start')
   useEffect(() => {
     if (!editor) return;
     editor.view.dom.setAttribute(
       'style',
-      `font-family: ${editorStyle.fontCss}; color: ${editorStyle.color}; font-size: ${editorStyle.sizePx}px; line-height: ${LINE_HEIGHT_PX}px; background: transparent;`
+      `font-family: ${editorStyle.fontCss}; color: ${editorStyle.color}; font-size: ${editorStyle.sizePx}px; line-height: ${LINE_HEIGHT_PX}px; background: transparent; user-select: text; -webkit-user-select: text;`
     );
+    (editor.view.dom as HTMLElement & { __editor?: typeof editor }).__editor = editor;
   }, [editor, editorStyle]);
 
   // Sync content if it changes externally (e.g. page jump)
@@ -84,7 +90,7 @@ export function PageEditor({
   return (
     <EditorContent
       editor={editor}
-      className="w-full h-full [&_.tiptap]:h-full [&_.tiptap]:min-h-full"
+      className="w-full h-full [&_.tiptap]:w-full [&_.tiptap]:min-h-full"
     />
   );
 }

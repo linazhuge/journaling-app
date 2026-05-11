@@ -1,3 +1,11 @@
+export const HABIT_TRACKER_DURATIONS = {
+  '1yr': { label: '1 Year',  subtitle: '12 months', pageCount: 12 },
+  '2yr': { label: '2 Years', subtitle: '24 months', pageCount: 24 },
+  '5yr': { label: '5 Years', subtitle: '60 months', pageCount: 60 },
+} as const;
+
+export type HabitTrackerDuration = keyof typeof HABIT_TRACKER_DURATIONS;
+
 export const JOURNAL_SIZES = {
   pocket: {
     label: 'Pocket',

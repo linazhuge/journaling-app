@@ -1,8 +1,8 @@
 export const EDITOR_FONTS = [
-  { label: 'Lora',         css: 'Lora, serif' },
-  { label: 'Merriweather', css: 'Merriweather, serif' },
-  { label: 'Garamond',     css: '"EB Garamond", serif' },
-  { label: 'Typewriter',   css: '"Courier Prime", monospace' },
+  { label: 'Lora',         css: 'var(--font-lora), serif' },
+  { label: 'Merriweather', css: 'var(--font-merriweather), serif' },
+  { label: 'Garamond',     css: 'var(--font-eb-garamond), serif' },
+  { label: 'Typewriter',   css: 'var(--font-courier-prime), monospace' },
   { label: 'Georgia',      css: 'Georgia, serif' },
 ] as const;
 
@@ -25,3 +25,9 @@ export const MAX_SIZE = 24;
 
 /** Fixed ruling on every page — never changes with font size. */
 export const LINE_HEIGHT_PX = 32;
+
+/** Page padding — shared between JournalPage (lines overlay) and PageEditor (click area). */
+export const PAGE_PADDING_TOP = 24;
+export const PAGE_PADDING_BOTTOM = 24;
+export const PAGE_PADDING_LEFT = 56;
+export const PAGE_PADDING_RIGHT = 24;

@@ -10,7 +10,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { JOURNAL_SIZES, COVER_COLORS, type JournalSize } from '@/lib/journal-config';
+import { JOURNAL_SIZES, COVER_COLORS, HABIT_TRACKER_DURATIONS, type JournalSize, type HabitTrackerDuration } from '@/lib/journal-config';
 
 interface CreateJournalModalProps {
   open: boolean;
@@ -20,7 +20,9 @@ interface CreateJournalModalProps {
 export function CreateJournalModal({ open, onClose }: CreateJournalModalProps) {
   const router = useRouter();
   const [name, setName] = useState('');
+  const [type, setType] = useState<'writing' | 'habit_tracker'>('writing');
   const [size, setSize] = useState<JournalSize>('standard');
+  const [duration, setDuration] = useState<HabitTrackerDuration>('1yr');
   const [color, setColor] = useState(COVER_COLORS[0].value);
   const [loading, setLoading] = useState(false);
 
@@ -32,7 +34,7 @@ export function CreateJournalModal({ open, onClose }: CreateJournalModalProps) {
       const res = await fetch('/api/journals', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: name.trim(), size, coverColor: color }),
+        body: JSON.stringify({ name: name.trim(), size, coverColor: color, type, duration }),
       });
       const journal = await res.json();
       onClose();
@@ -45,7 +47,9 @@ export function CreateJournalModal({ open, onClose }: CreateJournalModalProps) {
   const handleClose = () => {
     if (loading) return;
     setName('');
+    setType('writing');
     setSize('standard');
+    setDuration('1yr');
     setColor(COVER_COLORS[0].value);
     onClose();
   };
@@ -74,8 +78,61 @@ export function CreateJournalModal({ open, onClose }: CreateJournalModalProps) {
             />
           </div>
 
-          {/* Size */}
+          {/* Type */}
           <div className="space-y-1.5">
+            <label className="text-sm font-medium text-stone-700">Type</label>
+            <div className="grid grid-cols-2 gap-2">
+              {(['writing', 'habit_tracker'] as const).map((t) => (
+                <button
+                  key={t}
+                  type="button"
+                  onClick={() => setType(t)}
+                  className={`px-3 py-2.5 rounded-md border text-left transition-all
+                    ${type === t
+                      ? 'border-stone-600 bg-stone-50 ring-1 ring-stone-600'
+                      : 'border-stone-200 hover:border-stone-400'
+                    }`}
+                >
+                  <div className="text-xs font-medium text-stone-700">
+                    {t === 'writing' ? 'Writing' : 'Habit Tracker'}
+                  </div>
+                  <div className="text-[10px] text-stone-400 mt-0.5">
+                    {t === 'writing' ? 'Lined pages, free writing' : 'Monthly habit grids'}
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Duration — only for habit trackers */}
+          {type === 'habit_tracker' && (
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-stone-700">Duration</label>
+              <div className="grid grid-cols-3 gap-2">
+                {(Object.entries(HABIT_TRACKER_DURATIONS) as [HabitTrackerDuration, typeof HABIT_TRACKER_DURATIONS[HabitTrackerDuration]][]).map(
+                  ([key, cfg]) => (
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() => setDuration(key)}
+                      className={`px-3 py-2.5 rounded-md border text-left transition-all
+                        ${duration === key
+                          ? 'border-stone-600 bg-stone-50 ring-1 ring-stone-600'
+                          : 'border-stone-200 hover:border-stone-400'
+                        }`}
+                    >
+                      <div className="text-xs font-medium text-stone-700">{cfg.label}</div>
+                      <div className="text-[10px] text-stone-400 mt-0.5">{cfg.subtitle}</div>
+                      <div className="text-[10px] text-stone-400">{cfg.pageCount}pg</div>
+                    </button>
+                  )
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Size — only for writing journals */}
+          {type === 'writing' && <div className="space-y-1.5">
             <label className="text-sm font-medium text-stone-700">Size</label>
             <div className="grid grid-cols-3 gap-2">
               {(Object.entries(JOURNAL_SIZES) as [JournalSize, typeof JOURNAL_SIZES[JournalSize]][]).map(
@@ -97,7 +154,7 @@ export function CreateJournalModal({ open, onClose }: CreateJournalModalProps) {
                 )
               )}
             </div>
-          </div>
+          </div>}
 
           {/* Cover color */}
           <div className="space-y-1.5">
@@ -129,7 +186,9 @@ export function CreateJournalModal({ open, onClose }: CreateJournalModalProps) {
             <div>
               <p className="font-serif text-sm text-stone-700">{name || 'My Journal'}</p>
               <p className="text-xs text-stone-400 mt-0.5">
-                {JOURNAL_SIZES[size].label} · {JOURNAL_SIZES[size].pageCount} pages
+                {type === 'habit_tracker'
+                  ? `Habit Tracker · ${HABIT_TRACKER_DURATIONS[duration].label}`
+                  : `${JOURNAL_SIZES[size].label} · ${JOURNAL_SIZES[size].pageCount} pages`}
               </p>
             </div>
           </div>
